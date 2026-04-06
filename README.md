@@ -1,6 +1,6 @@
 # 🌍 Quickview GeoData Portal
 
-An open-source geospatial data platform for uploading, extracting, and analyzing point data interactively.
+An open-source geospatial data platform for uploading, extracting, and analyzing geospatial vector data (points, lines, and polygons) interactively.
 
 ## Stack
 - **Backend**: Python 3.11 + FastAPI + GeoPandas + Scikit-learn + SciPy
