@@ -4,9 +4,9 @@
 
 // ── Config ────────────────────────────────────────────────────────────────
 window.GEO = {
-  // Change this to your Railway/backend URL in production
+  // Change this to your backend URL in production
   // For local dev: http://localhost:8000
-  API_BASE: "http://localhost:8000/api/v1",
+  API_BASE: "https://github.com/Jeffreyblay/quickview-geodata-portal",
 
   // Current session state
   sessionId: null,
