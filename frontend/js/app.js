@@ -6,7 +6,7 @@
 window.GEO = {
   // Change this to your backend URL in production
   // For local dev: http://localhost:8000
-  API_BASE: "https://github.com/Jeffreyblay/quickview-geodata-portal",
+  API_BASE: "https://quickview-geodata-portal-production.up.railway.app/api/v1",
 
   // Current session state
   sessionId: null,
