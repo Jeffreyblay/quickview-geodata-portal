@@ -9,10 +9,10 @@ An open-source geospatial data platform for uploading, extracting, and analyzing
 - **Containerization**: Docker + Docker Compose
 
 ## Features
-- Upload CSV, GeoJSON, or Zipped Shapefiles
+- Upload CSV, GeoJSON, JSON or Zipped Shapefiles
 - Fetch remote datasets via URL (wget-style)
-- Interactive Leaflet map with point rendering
-- 6 spatial analyses: Buffer, KDE Hotspot, DBSCAN Clustering, Nearest Neighbor, Convex Hull, Attribute Stats
+- Interactive Leaflet map with data rendering
+- Basic Spatial analyses: Buffer, KDE Hotspot, DBSCAN Clustering, Nearest Neighbor, Attribute Stats
 - Attribute table with column filtering
 - Dataset metadata panel
 
