@@ -1,4 +1,4 @@
-# 🌍 GeoData Portal
+# 🌍 Quickview GeoData Portal
 
 An open-source geospatial data platform for uploading, extracting, and analyzing point data interactively.
 
