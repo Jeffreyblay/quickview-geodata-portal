@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: geodata-portal-api
+    ports:
+      - "8000:8000"
+    environment:
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - MAX_UPLOAD_MB=50
+    volumes:
+      - /tmp/geodata_portal:/tmp/geodata_portal
+    restart: unless-stopped
+
+  frontend:
+    image: nginx:alpine
+    container_name: geodata-portal-frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ../frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    restart: unless-stopped

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quickview Geodata Portal</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-mark">Q</div>
+    <div class="brand-text">
+      <span class="brand-name">Quickview</span>
+      <span class="brand-sub">Geodata Portal</span>
+    </div>
+  </div>
+  <nav class="top-nav">
+    <button class="nav-btn active" data-view="map">Map</button>
+    <button class="nav-btn" data-view="analysis">Analysis</button>
+    <button class="nav-btn" data-view="table">Table</button>
+  </nav>
+  <div class="status-pill" id="statusBar">
+    <span class="status-dot idle" id="statusDot"></span>
+    <span id="statusText">Ready</span>
+  </div>
+</header>
+
+<div class="app-layout">
+
+  <!-- LEFT PANEL -->
+  <aside class="panel panel-left">
+
+    <div class="section">
+      <div class="section-title">Upload File</div>
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-arrow">↑</div>
+        <div class="drop-text">Drop file here</div>
+        <div class="drop-sub">CSV · GeoJSON · JSON · XML · ZIP</div>
+        <input type="file" id="fileInput" accept=".csv,.geojson,.json,.xml,.zip" hidden />
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Fetch from URL</div>
+      <input type="text" id="urlInput" class="text-input" placeholder="https://example.com/data.geojson" />
+      <div class="url-row">
+        <select id="fileTypeSelect" class="text-input">
+          <option value="" disabled selected>Select file type…</option>
+          <option value="csv">CSV</option>
+          <option value="geojson">GeoJSON</option>
+          <option value="json">JSON</option>
+          <option value="xml">XML</option>
+          <option value="zip">ZIP (Shapefile)</option>
+        </select>
+        <button class="btn btn-primary" id="fetchBtn">Fetch</button>
+      </div>
+    </div>
+
+    <div class="section" id="datasetMeta" style="display:none">
+      <div class="section-title">Dataset Info</div>
+      <div class="meta-grid">
+        <div class="meta-item"><span class="meta-label">Rows</span><span class="meta-val" id="metaRows">—</span></div>
+        <div class="meta-item"><span class="meta-label">Columns</span><span class="meta-val" id="metaCols">—</span></div>
+        <div class="meta-item"><span class="meta-label">CRS</span><span class="meta-val" id="metaCRS">—</span></div>
+        <div class="meta-item"><span class="meta-label">Geometry</span><span class="meta-val" id="metaGeom">—</span></div>
+      </div>
+      <div class="dtype-list" id="dtypeList"></div>
+    </div>
+
+    <div class="section" id="querySection" style="display:none">
+      <div class="section-title">Query Data</div>
+      <input type="text" id="queryInput" class="text-input" placeholder='e.g. elev_ft > 5' />
+      <div class="btn-row">
+        <button class="btn btn-outline" id="queryBtn">Apply</button>
+        <button class="btn btn-ghost" id="clearFilterBtn">Clear</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAP -->
+  <main class="map-container">
+    <div id="map"></div>
+    <div class="map-controls">
+      <button class="map-btn" id="fitBoundsBtn" title="Fit to data">⤢</button>
+      <button class="map-btn" id="clearLayersBtn" title="Clear layers">✕</button>
+      <div class="basemap-switcher" id="basemapSwitcher">
+        <button class="map-btn basemap-btn" id="basemapToggle" title="Switch basemap">⊕</button>
+        <div class="basemap-menu" id="basemapMenu" style="display:none">
+          <div class="basemap-option active" data-basemap="street">Street</div>
+          <div class="basemap-option" data-basemap="satellite">Satellite</div>
+          <div class="basemap-option" data-basemap="topo">Topo</div>
+          <div class="basemap-option" data-basemap="light">Light</div>
+        </div>
+      </div>
+    </div>
+    <div class="map-legend" id="mapLegend" style="display:none">
+      <div class="legend-title" id="legendTitle">Legend</div>
+      <div id="legendItems"></div>
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="panel panel-right">
+
+    <div class="analysis-tabs">
+      <button class="atab active" data-tab="spatial">Spatial</button>
+      <button class="atab" data-tab="stats">Stats</button>
+    </div>
+
+    <div class="tab-content active" id="tab-spatial">
+
+      <div class="analysis-card">
+        <div class="card-header" data-toggle="buffer">
+          <div class="card-header-left"><div class="card-dot"></div><span>Buffer</span></div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <label class="input-label">Radius (metres)</label>
+          <input type="number" id="bufferRadius" class="text-input" value="500" min="1" />
+          <button class="btn btn-primary run-btn" data-analysis="buffer">Run Buffer</button>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="card-header" data-toggle="hotspot">
+          <div class="card-header-left"><div class="card-dot"></div><span>KDE Hotspot</span></div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <label class="input-label">Grid Size</label>
+          <input type="number" id="hotspotGrid" class="text-input" value="100" min="20" max="300" />
+          <button class="btn btn-primary run-btn" data-analysis="hotspot">Run Hotspot</button>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="card-header" data-toggle="dbscan">
+          <div class="card-header-left"><div class="card-dot"></div><span>DBSCAN Clustering</span></div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <label class="input-label">Epsilon (metres)</label>
+          <input type="number" id="dbscanEps" class="text-input" value="500" min="1" />
+          <label class="input-label">Min Samples</label>
+          <input type="number" id="dbscanMin" class="text-input" value="5" min="2" />
+          <button class="btn btn-primary run-btn" data-analysis="dbscan">Run DBSCAN</button>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="card-header" data-toggle="nn">
+          <div class="card-header-left"><div class="card-dot"></div><span>Nearest Neighbor</span></div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <p class="card-desc">Computes mean NN distance and Clark-Evans R statistic.</p>
+          <button class="btn btn-primary run-btn" data-analysis="nearest-neighbor">Run Analysis</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tab-content" id="tab-stats">
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left"><div class="card-dot"></div><span>Attribute Statistics</span></div>
+        </div>
+        <div class="card-body open">
+          <p class="card-desc">Descriptive statistics for all numeric columns.</p>
+          <button class="btn btn-primary run-btn" data-analysis="attribute-stats">Compute Stats</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-panel" id="resultsPanel" style="display:none">
+      <div class="results-label">Results</div>
+      <div class="result-summary" id="resultSummary"></div>
+      <div class="result-stats" id="resultStats"></div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- ATTRIBUTE TABLE -->
+<div class="table-panel" id="tablePanel">
+  <div class="table-header">
+    <div class="table-header-left">
+      <span class="table-title">Attribute Table</span>
+      <span class="table-count" id="tableCount"></span>
+    </div>
+    <div class="table-controls">
+      <input type="text" id="tableSearch" class="text-input compact" placeholder="Search…" />
+      <select id="exportFormat" class="text-input compact">
+        <option value="geojson">GeoJSON</option>
+        <option value="csv">CSV</option>
+        <option value="json">JSON</option>
+      </select>
+      <button class="btn btn-outline compact" id="exportBtn">Export</button>
+      <button class="table-toggle" id="tableToggle">▲</button>
+    </div>
+  </div>
+  <div class="table-body" id="tableBody">
+    <div class="table-empty">Load a dataset to view attributes.</div>
+  </div>
+</div>
+
+<script src="js/app.js?v=4"></script>
+<script src="js/map.js?v=4"></script>
+<script src="js/ingest.js?v=4"></script>
+<script src="js/analysis.js?v=4"></script>
+<script src="js/table.js?v=4"></script>
+</body>
+</html>
