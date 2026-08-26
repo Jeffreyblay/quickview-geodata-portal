@@ -10,6 +10,8 @@
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/deck.gl@9.0.38/dist.min.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -30,6 +32,7 @@
     <button class="nav-btn active" data-view="map">Map</button>
     <button class="nav-btn" data-view="analysis">Analysis</button>
     <button class="nav-btn" data-view="table">Table</button>
+    <button class="nav-btn" data-view="3d">3D</button>
   </nav>
   <div class="status-pill" id="statusBar">
     <span class="status-dot idle" id="statusDot"></span>
@@ -89,6 +92,15 @@
     </div>
 
   </aside>
+
+  <!-- 3D VIEW -->
+  <main class="map-container" id="deck3dContainer" style="display:none">
+    <div id="deck3d"></div>
+    <div class="map-legend" id="deck3dHint" style="display:block">
+      <div class="legend-title">3D View</div>
+      <div id="deck3dHintText" style="font-size:11px;color:var(--text-muted,#a8a29c);max-width:200px">Run a spatial analysis to see it extruded here.</div>
+    </div>
+  </main>
 
   <!-- MAP -->
   <main class="map-container">
@@ -188,6 +200,7 @@
     <div class="results-panel" id="resultsPanel" style="display:none">
       <div class="results-label">Results</div>
       <div class="result-summary" id="resultSummary"></div>
+      <div class="chart-wrap" id="chartWrap" style="display:none"><canvas id="resultChart"></canvas></div>
       <div class="result-stats" id="resultStats"></div>
     </div>
 
@@ -208,6 +221,8 @@
         <option value="geojson">GeoJSON</option>
         <option value="csv">CSV</option>
         <option value="json">JSON</option>
+        <option value="geoparquet">GeoParquet</option>
+        <option value="gml">GML</option>
       </select>
       <button class="btn btn-outline compact" id="exportBtn">Export</button>
       <button class="table-toggle" id="tableToggle">▲</button>
@@ -218,10 +233,11 @@
   </div>
 </div>
 
-<script src="js/app.js?v=4"></script>
-<script src="js/map.js?v=4"></script>
-<script src="js/ingest.js?v=4"></script>
-<script src="js/analysis.js?v=4"></script>
-<script src="js/table.js?v=4"></script>
+<script src="js/app.js?v=5"></script>
+<script src="js/map.js?v=5"></script>
+<script src="js/view3d.js?v=5"></script>
+<script src="js/ingest.js?v=5"></script>
+<script src="js/analysis.js?v=5"></script>
+<script src="js/table.js?v=5"></script>
 </body>
 </html>

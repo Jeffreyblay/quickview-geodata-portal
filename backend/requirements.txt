@@ -12,3 +12,4 @@ requests==2.32.2
 python-dotenv==1.0.1
 pydantic-settings==2.2.1
 aiofiles==23.2.1
+pyarrow==16.1.0

@@ -109,15 +109,18 @@ function initNavSwitcher() {
 function switchView(view) {
   const leftPanel   = document.querySelector(".panel-left");
   const rightPanel  = document.querySelector(".panel-right");
-  const mapContainer = document.querySelector(".map-container");
   const tablePanel  = document.getElementById("tablePanel");
   const layout      = document.querySelector(".app-layout");
+  const mapMain     = document.getElementById("map").closest(".map-container");
+  const deck3dMain  = document.getElementById("deck3dContainer");
 
   // Reset all
   leftPanel.style.display  = "";
   rightPanel.style.display = "";
   tablePanel.classList.remove("table-fullscreen");
   layout.style.gridTemplateColumns = "";
+  mapMain.style.display = "";
+  deck3dMain.style.display = "none";
 
   if (view === "map") {
     // Default — left + map + right
@@ -136,10 +139,18 @@ function switchView(view) {
     tablePanel.classList.add("table-fullscreen");
     // Expand the table panel
     tablePanel.classList.remove("collapsed");
+
+  } else if (view === "3d") {
+    leftPanel.style.display  = "none";
+    layout.style.gridTemplateColumns = "1fr var(--panel-w)";
+    mapMain.style.display = "none";
+    deck3dMain.style.display = "";
+    if (window.init3D) window.init3D();
   }
 
   // Invalidate Leaflet map size after layout change
   setTimeout(() => {
     if (window.map) window.map.invalidateSize();
+    if (window.resize3D) window.resize3D();
   }, 50);
 }

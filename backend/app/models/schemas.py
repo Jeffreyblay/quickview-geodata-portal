@@ -49,7 +49,6 @@ class NearestNeighborRequest(BaseModel):
     session_id: str
 
 
-
 class AttributeStatsRequest(BaseModel):
     session_id: str
     columns: Optional[List[str]] = None   # None = all numeric columns

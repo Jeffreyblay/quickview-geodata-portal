@@ -142,10 +142,9 @@ function renderAnalysisLayer(geojson, analysisType) {
     return;
   }
 
-  // Buffer, Hull — polygon layers
+  // Buffer, Nearest Neighbor — polygon/point layers
   const styleMap = {
     buffer:           { color: "#c25b2e", fillColor: "#c25b2e", fillOpacity: 0.08, weight: 1.5, dashArray: "4 3" },
-    convex_hull:      { color: "#2e7c8f", fillColor: "#2e7c8f", fillOpacity: 0.08, weight: 2 },
     nearest_neighbor: { color: "#c25b2e", fillColor: "#c25b2e", fillOpacity: 0.6, weight: 1 },
   };
 
@@ -196,7 +195,6 @@ function updateLegend(type, items = null) {
     buffer:           "Buffer",
     hotspot_kde:      "KDE Density",
     dbscan_clustering:"DBSCAN Clusters",
-    convex_hull:      "Convex Hull",
     nearest_neighbor: "NN Distance",
   };
 
@@ -215,7 +213,6 @@ function updateLegend(type, items = null) {
     const colorMap = {
       buffer:      "#c25b2e",
       hotspot_kde: "gradient",
-      convex_hull: "#2e7c8f",
     };
     const c = colorMap[type] || "#7c6dfa";
     if (c === "gradient") {

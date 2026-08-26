@@ -1,12 +1,11 @@
 """
 Analysis Service
-Implements 6 spatial analyses for point data:
+Implements 5 spatial analyses for point data:
   1. Buffer
   2. KDE Hotspot
   3. DBSCAN Clustering
   4. Nearest Neighbor Distance
-  5. Convex Hull
-  6. Attribute Statistics
+  5. Attribute Statistics
 """
 import numpy as np
 import pandas as pd
@@ -14,7 +13,7 @@ import geopandas as gpd
 from scipy.stats import gaussian_kde
 from scipy.spatial import cKDTree
 from sklearn.cluster import DBSCAN
-from shapely.geometry import Point, MultiPoint
+from shapely.geometry import Point
 from shapely.ops import unary_union
 
 from app.models.schemas import AnalysisResult
@@ -169,29 +168,7 @@ def run_nearest_neighbor(session_id: str) -> AnalysisResult:
     )
 
 
-# ── 5. Convex Hull ───────────────────────────────────────────────────────────
-
-def run_convex_hull(session_id: str) -> AnalysisResult:
-    gdf = get_session_gdf(session_id)
-
-    multipoint = MultiPoint(list(gdf.geometry))
-    hull = multipoint.convex_hull
-
-    hull_gdf = gpd.GeoDataFrame(geometry=[hull], crs="EPSG:4326")
-    area_km2 = _to_projected(hull_gdf).geometry.area[0] / 1_000_000
-
-    return AnalysisResult(
-        analysis_type="convex_hull",
-        geojson=hull_gdf.__geo_interface__,
-        stats={
-            "area_km2": round(area_km2, 4),
-            "point_count": len(gdf),
-        },
-        summary=f"Convex hull covers {area_km2:.2f} km² enclosing {len(gdf)} points.",
-    )
-
-
-# ── 6. Attribute Statistics ──────────────────────────────────────────────────
+# ── 5. Attribute Statistics ──────────────────────────────────────────────────
 
 def run_attribute_stats(session_id: str, columns: list[str] | None) -> AnalysisResult:
     gdf = get_session_gdf(session_id)

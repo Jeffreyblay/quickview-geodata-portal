@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import ingest, analysis
+from app.api.routes import ingest, analysis, export
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -23,6 +23,7 @@ app.add_middleware(
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(ingest.router, prefix="/api/v1")
 app.include_router(analysis.router, prefix="/api/v1")
+app.include_router(export.router, prefix="/api/v1")
 
 
 @app.get("/", tags=["Health"])

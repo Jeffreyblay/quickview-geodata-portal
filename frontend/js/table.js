@@ -172,10 +172,17 @@ function zoomToPoint(lat, lng, props) {
 
 // ── Export ─────────────────────────────────────────────────────────────────
 function exportGeoJSON() {
+  const format = document.getElementById("exportFormat").value;
+
+  if (format === "geoparquet" || format === "gml") {
+    if (!window.GEO.sessionId) { toast("No data to export", "warn"); return; }
+    toast(`Exporting full session dataset as ${format.toUpperCase()} (unfiltered)`, "success");
+    window.open(`${window.GEO.API_BASE}/export/${window.GEO.sessionId}/${format}`, "_blank");
+    return;
+  }
+
   const geojson = window.GEO.filteredGeoJSON || window.GEO.currentGeoJSON;
   if (!geojson) { toast("No data to export", "warn"); return; }
-
-  const format = document.getElementById("exportFormat").value;
 
   if (format === "geojson") {
     _download(JSON.stringify(geojson, null, 2), "geodata_export.geojson", "application/json");
