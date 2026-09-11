@@ -553,6 +553,30 @@ html, body {
   flex-shrink: 0;
 }
 
+/* ── 3D VIEW PANEL ───────────────────────────────────────────── */
+.view3d-panel {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 500;
+  width: 210px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-md);
+}
+.view3d-panel .input-label:first-child { margin-top: 0; }
+.v3d-range { width: 100%; accent-color: var(--accent); }
+.v3d-fit { width: 100%; margin-top: 8px; }
+.v3d-note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+.v3d-note:empty { display: none; }
+
 /* Symbology + analysis legends stack in the bottom-left corner */
 .legend-stack {
   position: absolute;

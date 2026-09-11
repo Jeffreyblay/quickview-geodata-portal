@@ -5,20 +5,13 @@
 let map, basePointLayer, analysisLayer, heatLayer, currentTileLayer;
 let currentBasemap = null;
 
-// Esri and CARTO basemaps label places in English / Latin script.
+// Esri basemaps label places in English / Latin script.
 // OpenStreetMap-based styles label them in the local language (e.g. Arabic in North Africa).
+// CARTO basemaps are not used: they now require an API key and watermark keyless tiles.
 const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services";
-const CARTO_ATTR = "© OpenStreetMap contributors, © CARTO";
 const ESRI_ATTR = "Tiles © Esri";
 
 const BASEMAPS = {
-  voyager: {
-    group: "Street",
-    label: "Voyager",
-    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    attribution: CARTO_ATTR,
-    maxNativeZoom: 20,
-  },
   esriStreet: {
     group: "Street",
     label: "Esri Streets",
@@ -70,31 +63,25 @@ const BASEMAPS = {
     attribution: "© OpenStreetMap contributors, SRTM | © OpenTopoMap (CC-BY-SA)",
     maxNativeZoom: 17,
   },
-  light: {
-    group: "Minimal",
-    label: "Light",
-    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-    attribution: CARTO_ATTR,
-    maxNativeZoom: 20,
-  },
-  dark: {
-    group: "Minimal",
-    label: "Dark",
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    attribution: CARTO_ATTR,
-    maxNativeZoom: 20,
-  },
   gray: {
     group: "Minimal",
-    label: "Esri Light Gray",
+    label: "Light gray",
     url: `${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
     overlays: [`${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`],
     attribution: ESRI_ATTR,
     maxNativeZoom: 16,
   },
+  darkGray: {
+    group: "Minimal",
+    label: "Dark gray",
+    url: `${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
+    overlays: [`${ESRI}/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`],
+    attribution: ESRI_ATTR,
+    maxNativeZoom: 16,
+  },
 };
 
-const DEFAULT_BASEMAP = "voyager";
+const DEFAULT_BASEMAP = "esriStreet";
 const BASEMAP_STORAGE_KEY = "quickview.basemap";
 
 function initMap() {

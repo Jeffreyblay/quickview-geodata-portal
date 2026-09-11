@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css?v=6" />
+  <link rel="stylesheet" href="css/style.css?v=7" />
 </head>
 <body>
 
@@ -143,9 +143,23 @@
   <!-- 3D VIEW -->
   <main class="map-container" id="deck3dContainer" style="display:none">
     <div id="deck3d"></div>
-    <div class="map-legend" id="deck3dHint" style="display:block">
+    <div class="view3d-panel" id="view3dPanel">
       <div class="legend-title">3D View</div>
-      <div id="deck3dHintText" style="font-size:11px;color:var(--text-muted,#a8a29c);max-width:200px">Run a spatial analysis to see it extruded here.</div>
+      <div id="v3dControls" style="display:none">
+        <label class="input-label">Show</label>
+        <select id="v3dSource" class="text-input">
+          <option value="data">Dataset</option>
+          <option value="analysis" disabled>Last analysis result</option>
+        </select>
+        <div id="v3dFieldRow">
+          <label class="input-label">Height from</label>
+          <select id="v3dField" class="text-input"></select>
+        </div>
+        <label class="input-label">Height scale <span id="v3dScaleVal">1.0×</span></label>
+        <input type="range" id="v3dScale" class="v3d-range" min="0.1" max="5" step="0.1" value="1" />
+        <button class="btn btn-ghost compact v3d-fit" id="v3dFitBtn">Fit to data</button>
+      </div>
+      <div class="v3d-note" id="v3dNote">Load a point or polygon dataset to view it in 3D.</div>
     </div>
   </main>
 
@@ -282,13 +296,13 @@
   </div>
 </div>
 
-<script src="js/app.js?v=6"></script>
-<script src="js/map.js?v=6"></script>
-<script src="js/view3d.js?v=6"></script>
-<script src="js/ingest.js?v=6"></script>
-<script src="js/analysis.js?v=6"></script>
-<script src="js/table.js?v=6"></script>
-<script src="js/filter.js?v=6"></script>
-<script src="js/symbology.js?v=6"></script>
+<script src="js/app.js?v=7"></script>
+<script src="js/map.js?v=7"></script>
+<script src="js/view3d.js?v=7"></script>
+<script src="js/ingest.js?v=7"></script>
+<script src="js/analysis.js?v=7"></script>
+<script src="js/table.js?v=7"></script>
+<script src="js/filter.js?v=7"></script>
+<script src="js/symbology.js?v=7"></script>
 </body>
 </html>
