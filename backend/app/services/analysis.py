@@ -32,8 +32,8 @@ def _to_wgs84(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 # ── 1. Buffer ────────────────────────────────────────────────────────────────
 
-def run_buffer(session_id: str, radius_m: float) -> AnalysisResult:
-    gdf = get_session_gdf(session_id)
+def run_buffer(session_id: str, radius_m: float, feature_ids=None) -> AnalysisResult:
+    gdf = get_session_gdf(session_id, feature_ids)
     proj = _to_projected(gdf)
     buffered = proj.copy()
     buffered["geometry"] = proj.geometry.buffer(radius_m)
@@ -52,8 +52,8 @@ def run_buffer(session_id: str, radius_m: float) -> AnalysisResult:
 
 # ── 2. KDE Hotspot ───────────────────────────────────────────────────────────
 
-def run_hotspot(session_id: str, bandwidth: float | None, grid_size: int) -> AnalysisResult:
-    gdf = get_session_gdf(session_id)
+def run_hotspot(session_id: str, bandwidth: float | None, grid_size: int, feature_ids=None) -> AnalysisResult:
+    gdf = get_session_gdf(session_id, feature_ids)
     proj = _to_projected(gdf)
 
     coords = np.array([[geom.x, geom.y] for geom in proj.geometry if geom is not None])
@@ -96,8 +96,8 @@ def run_hotspot(session_id: str, bandwidth: float | None, grid_size: int) -> Ana
 
 # ── 3. DBSCAN Clustering ─────────────────────────────────────────────────────
 
-def run_dbscan(session_id: str, epsilon_m: float, min_samples: int) -> AnalysisResult:
-    gdf = get_session_gdf(session_id)
+def run_dbscan(session_id: str, epsilon_m: float, min_samples: int, feature_ids=None) -> AnalysisResult:
+    gdf = get_session_gdf(session_id, feature_ids)
     proj = _to_projected(gdf)
 
     coords = np.array([[geom.x, geom.y] for geom in proj.geometry if geom is not None])
@@ -128,8 +128,8 @@ def run_dbscan(session_id: str, epsilon_m: float, min_samples: int) -> AnalysisR
 
 # ── 4. Nearest Neighbor ──────────────────────────────────────────────────────
 
-def run_nearest_neighbor(session_id: str) -> AnalysisResult:
-    gdf = get_session_gdf(session_id)
+def run_nearest_neighbor(session_id: str, feature_ids=None) -> AnalysisResult:
+    gdf = get_session_gdf(session_id, feature_ids)
     proj = _to_projected(gdf)
 
     coords = np.array([[geom.x, geom.y] for geom in proj.geometry if geom is not None])
@@ -170,8 +170,8 @@ def run_nearest_neighbor(session_id: str) -> AnalysisResult:
 
 # ── 5. Attribute Statistics ──────────────────────────────────────────────────
 
-def run_attribute_stats(session_id: str, columns: list[str] | None) -> AnalysisResult:
-    gdf = get_session_gdf(session_id)
+def run_attribute_stats(session_id: str, columns: list[str] | None, feature_ids=None) -> AnalysisResult:
+    gdf = get_session_gdf(session_id, feature_ids)
     df = pd.DataFrame(gdf.drop(columns="geometry", errors="ignore"))
 
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()

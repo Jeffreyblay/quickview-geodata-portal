@@ -336,7 +336,6 @@ html, body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
-  margin-bottom: 10px;
 }
 
 .meta-item {
@@ -361,21 +360,6 @@ html, body {
   font-weight: 600;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
-}
-
-.dtype-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.dtype-tag {
-  background: var(--bg-page);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2px 7px;
-  font-size: 10px;
-  color: var(--text-secondary);
 }
 
 /* ── MAP ─────────────────────────────────────────────────────── */
@@ -446,6 +430,92 @@ html, body {
 .basemap-option:hover { background: var(--bg-hover); color: var(--text-primary); }
 .basemap-option.active { color: var(--accent); background: var(--accent-light); }
 
+.basemap-menu {
+  min-width: 190px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.basemap-group {
+  padding: 8px 14px 4px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+.basemap-group:first-child { border-top: none; }
+
+/* ── ATTRIBUTE FILTER ────────────────────────────────────────── */
+.filter-match {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.filter-match .text-input { padding: 4px 8px; }
+
+.filter-cond {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cond-top, .cond-bottom, .cond-values {
+  display: flex;
+  gap: 5px;
+  min-width: 0;
+}
+.cond-top .cond-field { flex: 1; min-width: 0; }
+.cond-bottom .cond-op { flex: 0 0 42%; min-width: 0; }
+.cond-values { flex: 1; }
+.cond-values .text-input { flex: 1; min-width: 0; }
+
+.cond-remove {
+  flex: 0 0 26px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+}
+.cond-remove:hover { color: var(--error); border-color: var(--error); }
+
+.add-cond-btn { width: 100%; margin-top: 2px; }
+
+.filter-status {
+  font-size: 11px;
+  color: var(--accent);
+  margin-top: 8px;
+}
+.filter-status:empty { display: none; }
+
+/* ── SYMBOLOGY ───────────────────────────────────────────────── */
+.sym-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.sym-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 10px;
+  cursor: pointer;
+}
+
 .map-legend {
   position: absolute;
   bottom: 20px;
@@ -481,6 +551,34 @@ html, body {
   width: 12px; height: 12px;
   border-radius: 3px;
   flex-shrink: 0;
+}
+
+/* Symbology + analysis legends stack in the bottom-left corner */
+.legend-stack {
+  position: absolute;
+  bottom: 20px;
+  left: 12px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: calc(100% - 40px);
+  overflow-y: auto;
+}
+.legend-stack .map-legend { position: static; max-width: 240px; }
+
+.legend-dot { border-radius: 50%; border: 1px solid rgba(26,23,20,0.25); }
+.legend-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.legend-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── ANALYSIS TABS ───────────────────────────────────────────── */

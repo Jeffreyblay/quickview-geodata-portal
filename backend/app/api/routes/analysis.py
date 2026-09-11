@@ -26,28 +26,28 @@ def _handle(fn, *args, **kwargs) -> AnalysisResult:
 @router.post("/buffer", response_model=AnalysisResult)
 async def buffer(req: BufferRequest):
     """Generate buffers around each point at a given radius (metres)."""
-    return _handle(svc.run_buffer, req.session_id, req.radius_m)
+    return _handle(svc.run_buffer, req.session_id, req.radius_m, req.feature_ids)
 
 
 @router.post("/hotspot", response_model=AnalysisResult)
 async def hotspot(req: HotspotRequest):
     """KDE-based hotspot / heatmap analysis."""
-    return _handle(svc.run_hotspot, req.session_id, req.bandwidth, req.grid_size)
+    return _handle(svc.run_hotspot, req.session_id, req.bandwidth, req.grid_size, req.feature_ids)
 
 
 @router.post("/dbscan", response_model=AnalysisResult)
 async def dbscan(req: DBSCANRequest):
     """DBSCAN density-based spatial clustering."""
-    return _handle(svc.run_dbscan, req.session_id, req.epsilon_m, req.min_samples)
+    return _handle(svc.run_dbscan, req.session_id, req.epsilon_m, req.min_samples, req.feature_ids)
 
 
 @router.post("/nearest-neighbor", response_model=AnalysisResult)
 async def nearest_neighbor(req: NearestNeighborRequest):
     """Nearest neighbor distance analysis with Clark-Evans R statistic."""
-    return _handle(svc.run_nearest_neighbor, req.session_id)
+    return _handle(svc.run_nearest_neighbor, req.session_id, req.feature_ids)
 
 
 @router.post("/attribute-stats", response_model=AnalysisResult)
 async def attribute_stats(req: AttributeStatsRequest):
     """Descriptive statistics for numeric attribute columns."""
-    return _handle(svc.run_attribute_stats, req.session_id, req.columns)
+    return _handle(svc.run_attribute_stats, req.session_id, req.columns, req.feature_ids)

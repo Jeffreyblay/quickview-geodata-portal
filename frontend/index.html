@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=6" />
 </head>
 <body>
 
@@ -79,15 +79,62 @@
         <div class="meta-item"><span class="meta-label">CRS</span><span class="meta-val" id="metaCRS">—</span></div>
         <div class="meta-item"><span class="meta-label">Geometry</span><span class="meta-val" id="metaGeom">—</span></div>
       </div>
-      <div class="dtype-list" id="dtypeList"></div>
     </div>
 
     <div class="section" id="querySection" style="display:none">
-      <div class="section-title">Query Data</div>
-      <input type="text" id="queryInput" class="text-input" placeholder='e.g. elev_ft > 5' />
+      <div class="section-title">Attribute Filter</div>
+      <div class="filter-match" id="filterMatchRow">
+        Match
+        <select id="filterCombinator" class="text-input compact">
+          <option value="and">all</option>
+          <option value="or">any</option>
+        </select>
+        of these conditions
+      </div>
+      <div id="filterConditions"></div>
+      <button class="btn btn-ghost compact add-cond-btn" id="addConditionBtn">+ Add condition</button>
       <div class="btn-row">
         <button class="btn btn-outline" id="queryBtn">Apply</button>
         <button class="btn btn-ghost" id="clearFilterBtn">Clear</button>
+      </div>
+      <div class="filter-status" id="filterStatus"></div>
+    </div>
+
+    <div class="section" id="symbologySection" style="display:none">
+      <div class="section-title">Symbology</div>
+      <label class="input-label">Style by field</label>
+      <select id="symField" class="text-input">
+        <option value="">Single colour</option>
+      </select>
+      <div id="symNumericOpts" style="display:none">
+        <div class="sym-grid">
+          <div>
+            <label class="input-label">Method</label>
+            <select id="symMethod" class="text-input">
+              <option value="quantile">Quantile</option>
+              <option value="equal">Equal interval</option>
+              <option value="jenks">Natural breaks</option>
+            </select>
+          </div>
+          <div>
+            <label class="input-label">Classes</label>
+            <select id="symClasses" class="text-input">
+              <option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option>
+            </select>
+          </div>
+        </div>
+        <label class="input-label">Colour ramp</label>
+        <select id="symRamp" class="text-input">
+          <option value="oranges">Oranges</option>
+          <option value="blues">Blues</option>
+          <option value="viridis">Viridis</option>
+          <option value="redblue">Red – Blue (diverging)</option>
+        </select>
+        <label class="sym-check"><input type="checkbox" id="symSize" /> Also size points by value</label>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" id="symApplyBtn">Apply style</button>
+        <button class="btn btn-ghost" id="symResetBtn">Reset</button>
       </div>
     </div>
 
@@ -110,17 +157,19 @@
       <button class="map-btn" id="clearLayersBtn" title="Clear layers">✕</button>
       <div class="basemap-switcher" id="basemapSwitcher">
         <button class="map-btn basemap-btn" id="basemapToggle" title="Switch basemap">⊕</button>
-        <div class="basemap-menu" id="basemapMenu" style="display:none">
-          <div class="basemap-option active" data-basemap="street">Street</div>
-          <div class="basemap-option" data-basemap="satellite">Satellite</div>
-          <div class="basemap-option" data-basemap="topo">Topo</div>
-          <div class="basemap-option" data-basemap="light">Light</div>
-        </div>
+        <!-- Options are generated from BASEMAPS in map.js -->
+        <div class="basemap-menu" id="basemapMenu" style="display:none"></div>
       </div>
     </div>
-    <div class="map-legend" id="mapLegend" style="display:none">
-      <div class="legend-title" id="legendTitle">Legend</div>
-      <div id="legendItems"></div>
+    <div class="legend-stack">
+      <div class="map-legend" id="symLegend" style="display:none">
+        <div class="legend-title" id="symLegendTitle">Symbology</div>
+        <div id="symLegendItems"></div>
+      </div>
+      <div class="map-legend" id="mapLegend" style="display:none">
+        <div class="legend-title" id="legendTitle">Legend</div>
+        <div id="legendItems"></div>
+      </div>
     </div>
   </main>
 
@@ -233,11 +282,13 @@
   </div>
 </div>
 
-<script src="js/app.js?v=5"></script>
-<script src="js/map.js?v=5"></script>
-<script src="js/view3d.js?v=5"></script>
-<script src="js/ingest.js?v=5"></script>
-<script src="js/analysis.js?v=5"></script>
-<script src="js/table.js?v=5"></script>
+<script src="js/app.js?v=6"></script>
+<script src="js/map.js?v=6"></script>
+<script src="js/view3d.js?v=6"></script>
+<script src="js/ingest.js?v=6"></script>
+<script src="js/analysis.js?v=6"></script>
+<script src="js/table.js?v=6"></script>
+<script src="js/filter.js?v=6"></script>
+<script src="js/symbology.js?v=6"></script>
 </body>
 </html>

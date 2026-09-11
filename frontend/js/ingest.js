@@ -106,8 +106,9 @@ function handleIngestResponse(data) {
   // Update attribute table
   renderTable(data.geojson);
 
-  // Show query section
-  document.getElementById("querySection").style.display = "block";
+  // Reset filter builder and symbology for the new columns
+  initFilterUI(data.meta);
+  initSymbologyUI(data.meta);
 
   setStatus("success", `${data.meta.total_rows} features loaded`);
 }
@@ -119,91 +120,5 @@ function updateMetaPanel(meta) {
   document.getElementById("metaCRS").textContent  = meta.crs ? meta.crs.split(":").pop() : "WGS84";
   document.getElementById("metaGeom").textContent = meta.geometry_type || (meta.has_geometry ? "Geometry" : "None");
 
-  // Dtype tags
-  const dtypeList = document.getElementById("dtypeList");
-  dtypeList.innerHTML = Object.entries(meta.dtypes)
-    .map(([col, dtype]) => {
-      const short = dtype.replace("object", "str").replace("float64", "float").replace("int64", "int");
-      return `<span class="dtype-tag">${col}: ${short}</span>`;
-    })
-    .join("");
-
   document.getElementById("datasetMeta").style.display = "block";
-}
-
-// ── Query / Filter ─────────────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("queryBtn").addEventListener("click", applyFilter);
-  document.getElementById("clearFilterBtn").addEventListener("click", clearFilter);
-});
-
-function applyFilter() {
-  const expr = document.getElementById("queryInput").value.trim();
-  if (!expr || !window.GEO.currentGeoJSON) return;
-
-  try {
-    const filtered = filterGeoJSON(window.GEO.currentGeoJSON, expr);
-    window.GEO.filteredGeoJSON = filtered;
-    renderPoints(filtered);
-    renderTable(filtered);
-    toast(`Filter applied — ${filtered.features.length} features`, "success");
-    setStatus("success", `Filtered: ${filtered.features.length} rows`);
-  } catch (err) {
-    toast(`Filter error: ${err.message}`, "error");
-  }
-}
-
-function clearFilter() {
-  if (!window.GEO.currentGeoJSON) return;
-  window.GEO.filteredGeoJSON = null;
-  renderPoints(window.GEO.currentGeoJSON);
-  renderTable(window.GEO.currentGeoJSON);
-  document.getElementById("queryInput").value = "";
-  toast("Filter cleared", "success");
-  setStatus("success", `${window.GEO.currentMeta.total_rows} features loaded`);
-}
-
-/**
- * Simple expression filter on GeoJSON properties.
- * Supports: col > val, col < val, col == val, col != val,
- *           col >= val, col <= val, col contains "str"
- */
-function filterGeoJSON(geojson, expr) {
-  // Parse expression
-  const ops = [">=", "<=", "!=", ">", "<", "==", "contains"];
-  let op = null, key = null, val = null;
-
-  for (const o of ops) {
-    if (expr.includes(o)) {
-      const parts = expr.split(o).map(s => s.trim());
-      op = o; key = parts[0]; val = parts[1];
-      break;
-    }
-  }
-
-  if (!op) throw new Error(`Unsupported expression. Use: col > value, col == "text", col contains "text"`);
-
-  // Strip quotes from string values
-  val = val.replace(/^["']|["']$/g, "");
-  const numVal = parseFloat(val);
-  const isNum = !isNaN(numVal) && val !== "";
-
-  const features = geojson.features.filter(f => {
-    const prop = f.properties?.[key];
-    if (prop === undefined || prop === null) return false;
-    const propNum = parseFloat(prop);
-
-    switch (op) {
-      case ">":        return isNum ? propNum > numVal : String(prop) > val;
-      case "<":        return isNum ? propNum < numVal : String(prop) < val;
-      case ">=":       return isNum ? propNum >= numVal : String(prop) >= val;
-      case "<=":       return isNum ? propNum <= numVal : String(prop) <= val;
-      case "==":       return String(prop) === val || (isNum && propNum === numVal);
-      case "!=":       return String(prop) !== val && (!isNum || propNum !== numVal);
-      case "contains": return String(prop).toLowerCase().includes(val.toLowerCase());
-      default:         return true;
-    }
-  });
-
-  return { type: "FeatureCollection", features };
 }

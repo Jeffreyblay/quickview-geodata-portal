@@ -3,29 +3,99 @@
  */
 
 let map, basePointLayer, analysisLayer, heatLayer, currentTileLayer;
+let currentBasemap = null;
+
+// Esri and CARTO basemaps label places in English / Latin script.
+// OpenStreetMap-based styles label them in the local language (e.g. Arabic in North Africa).
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services";
+const CARTO_ATTR = "© OpenStreetMap contributors, © CARTO";
+const ESRI_ATTR = "Tiles © Esri";
 
 const BASEMAPS = {
-  street: {
+  voyager: {
+    group: "Street",
+    label: "Voyager",
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    attribution: CARTO_ATTR,
+    maxNativeZoom: 20,
+  },
+  esriStreet: {
+    group: "Street",
+    label: "Esri Streets",
+    url: `${ESRI}/World_Street_Map/MapServer/tile/{z}/{y}/{x}`,
+    attribution: `${ESRI_ATTR} — HERE, Garmin, USGS, NGA, EPA, NPS`,
+    maxNativeZoom: 19,
+  },
+  osm: {
+    group: "Street",
+    label: "OpenStreetMap (local names)",
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution: "© OpenStreetMap contributors",
-    label: "Street",
+    maxNativeZoom: 19,
+  },
+  hybrid: {
+    group: "Imagery",
+    label: "Satellite + labels",
+    url: `${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
+    overlays: [`${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`],
+    attribution: `${ESRI_ATTR} — Maxar, Earthstar Geographics`,
+    maxNativeZoom: 19,
   },
   satellite: {
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution: "© Esri, Maxar, Earthstar Geographics",
+    group: "Imagery",
     label: "Satellite",
+    url: `${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
+    attribution: `${ESRI_ATTR} — Maxar, Earthstar Geographics`,
+    maxNativeZoom: 19,
   },
-  topo: {
+  esriTopo: {
+    group: "Terrain",
+    label: "Esri Topographic",
+    url: `${ESRI}/World_Topo_Map/MapServer/tile/{z}/{y}/{x}`,
+    attribution: `${ESRI_ATTR} — USGS, NOAA`,
+    maxNativeZoom: 19,
+  },
+  terrain: {
+    group: "Terrain",
+    label: "Shaded relief",
+    url: `${ESRI}/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}`,
+    overlays: [`${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`],
+    attribution: `${ESRI_ATTR} — USGS`,
+    maxNativeZoom: 13,
+  },
+  openTopo: {
+    group: "Terrain",
+    label: "OpenTopoMap (local names)",
     url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-    attribution: "© OpenTopoMap contributors",
-    label: "Topo",
+    attribution: "© OpenStreetMap contributors, SRTM | © OpenTopoMap (CC-BY-SA)",
+    maxNativeZoom: 17,
   },
   light: {
-    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-    attribution: "© OpenStreetMap contributors, © CARTO",
+    group: "Minimal",
     label: "Light",
+    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    attribution: CARTO_ATTR,
+    maxNativeZoom: 20,
+  },
+  dark: {
+    group: "Minimal",
+    label: "Dark",
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    attribution: CARTO_ATTR,
+    maxNativeZoom: 20,
+  },
+  gray: {
+    group: "Minimal",
+    label: "Esri Light Gray",
+    url: `${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
+    overlays: [`${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`],
+    attribution: ESRI_ATTR,
+    maxNativeZoom: 16,
   },
 };
+
+const DEFAULT_BASEMAP = "voyager";
+const BASEMAP_STORAGE_KEY = "quickview.basemap";
 
 function initMap() {
   map = L.map("map", {
@@ -36,48 +106,79 @@ function initMap() {
   });
   window.map = map;
 
-  // Load default basemap
-  currentTileLayer = L.tileLayer(BASEMAPS.street.url, {
-    attribution: BASEMAPS.street.attribution,
-    maxZoom: 19,
-  }).addTo(map);
+  buildBasemapMenu();
+
+  let saved = null;
+  try { saved = localStorage.getItem(BASEMAP_STORAGE_KEY); } catch (_) {}
+  switchBasemap(BASEMAPS[saved] ? saved : DEFAULT_BASEMAP);
+}
+
+function buildBasemapMenu() {
+  const menu = document.getElementById("basemapMenu");
+  const groups = {};
+  Object.entries(BASEMAPS).forEach(([key, def]) => {
+    (groups[def.group] = groups[def.group] || []).push(
+      `<div class="basemap-option" data-basemap="${key}">${def.label}</div>`
+    );
+  });
+  menu.innerHTML = Object.entries(groups)
+    .map(([group, opts]) => `<div class="basemap-group">${group}</div>${opts.join("")}`)
+    .join("");
 }
 
 function switchBasemap(name) {
   const def = BASEMAPS[name];
   if (!def || !map) return;
 
-  if (currentTileLayer) {
-    map.removeLayer(currentTileLayer);
-  }
+  if (currentTileLayer) map.removeLayer(currentTileLayer);
 
-  currentTileLayer = L.tileLayer(def.url, {
-    attribution: def.attribution,
-    maxZoom: 19,
-  }).addTo(map);
+  const tileOpts = { maxZoom: 20, maxNativeZoom: def.maxNativeZoom || 19 };
+  const layers = [L.tileLayer(def.url, { ...tileOpts, attribution: def.attribution })];
+  (def.overlays || []).forEach(url => layers.push(L.tileLayer(url, tileOpts)));
 
-  // Move tile layer to bottom so data layers stay on top
-  currentTileLayer.bringToBack();
+  // Tile layers live in the tile pane, so data layers always draw on top
+  currentTileLayer = L.layerGroup(layers).addTo(map);
+  currentBasemap = name;
 
-  // Update active state in menu
+  try { localStorage.setItem(BASEMAP_STORAGE_KEY, name); } catch (_) {}
+
   document.querySelectorAll(".basemap-option").forEach(opt => {
     opt.classList.toggle("active", opt.dataset.basemap === name);
   });
 }
 
 // ── Point Layer ───────────────────────────────────────────────────────────
-function renderPoints(geojson) {
+const DEFAULT_POINT_STYLE = {
+  radius: 5,
+  fillColor: "#c25b2e",
+  color: "#ffffff",
+  weight: 1,
+  fillOpacity: 0.8,
+};
+
+// Set by symbology.js; returns a style object for a feature (null = default)
+let pointStyleFn = null;
+
+function pointStyleFor(feature) {
+  return { ...DEFAULT_POINT_STYLE, ...(pointStyleFn ? pointStyleFn(feature) : {}) };
+}
+
+function setPointStyle(fn) {
+  pointStyleFn = fn;
+  if (!basePointLayer) return;
+  basePointLayer.eachLayer(layer => {
+    const style = pointStyleFor(layer.feature);
+    if (layer.setRadius) layer.setRadius(style.radius);
+    layer.setStyle(style);
+  });
+}
+
+function renderPoints(geojson, { fit = true } = {}) {
   if (basePointLayer) basePointLayer.remove();
 
   basePointLayer = L.geoJSON(geojson, {
-    pointToLayer: (feature, latlng) =>
-      L.circleMarker(latlng, {
-        radius: 5,
-        fillColor: "#c25b2e",
-        color: "#ffffff",
-        weight: 1,
-        fillOpacity: 0.8,
-      }),
+    style: feature => pointStyleFor(feature),   // lines / polygons
+    pointToLayer: (feature, latlng) => L.circleMarker(latlng, pointStyleFor(feature)),
     onEachFeature: (feature, layer) => {
       if (feature.properties) {
         const props = feature.properties;
@@ -90,7 +191,7 @@ function renderPoints(geojson) {
     },
   }).addTo(map);
 
-  fitToData();
+  if (fit) fitToData();
 }
 
 // ── Analysis Layers ───────────────────────────────────────────────────────

@@ -28,29 +28,30 @@ class FetchURLRequest(BaseModel):
 
 # ── Analysis ─────────────────────────────────────────────────────────────────
 
-class BufferRequest(BaseModel):
+class SessionRequest(BaseModel):
     session_id: str
+    feature_ids: Optional[List[str]] = None   # Restrict to these feature ids (active attribute filter); None = all
+
+
+class BufferRequest(SessionRequest):
     radius_m: float               # Buffer radius in metres
 
 
-class HotspotRequest(BaseModel):
-    session_id: str
+class HotspotRequest(SessionRequest):
     bandwidth: Optional[float] = None   # KDE bandwidth, auto if None
     grid_size: int = 100
 
 
-class DBSCANRequest(BaseModel):
-    session_id: str
+class DBSCANRequest(SessionRequest):
     epsilon_m: float = 500        # Neighbourhood radius in metres
     min_samples: int = 5
 
 
-class NearestNeighborRequest(BaseModel):
-    session_id: str
+class NearestNeighborRequest(SessionRequest):
+    pass
 
 
-class AttributeStatsRequest(BaseModel):
-    session_id: str
+class AttributeStatsRequest(SessionRequest):
     columns: Optional[List[str]] = None   # None = all numeric columns
 
 

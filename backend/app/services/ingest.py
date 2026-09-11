@@ -192,9 +192,19 @@ def fetch_url(url: str, file_type: str) -> Tuple[str, IngestResponse]:
     return parse_upload(content, filename)
 
 
-def get_session_gdf(session_id: str) -> gpd.GeoDataFrame:
+def get_session_gdf(session_id: str, feature_ids: Optional[list[str]] = None) -> gpd.GeoDataFrame:
+    """Return the session dataset, optionally restricted to feature ids.
+
+    Feature ids match the "id" field of the GeoJSON sent to the client,
+    which geopandas derives from str(index).
+    """
     gdf = SESSION_STORE.get(session_id)
     if gdf is None:
         raise KeyError(f"Session '{session_id}' not found. Please re-upload your data.")
-    return gdf
+    if feature_ids is None:
+        return gdf
+    subset = gdf[gdf.index.astype(str).isin(set(feature_ids))]
+    if subset.empty:
+        raise ValueError("The active filter matches no features.")
+    return subset
 

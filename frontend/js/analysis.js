@@ -65,6 +65,20 @@ async function runAnalysis(type) {
 
 // ── Build Request Body per Analysis Type ──────────────────────────────────
 function buildRequestBody(type) {
+  const body = buildAnalysisParams(type);
+  const ids = filteredFeatureIds();
+  if (ids) body.feature_ids = ids;
+  return body;
+}
+
+// Ids of the features matched by the active attribute filter, or null when unfiltered
+function filteredFeatureIds() {
+  const filtered = window.GEO.filteredGeoJSON;
+  if (!filtered) return null;
+  return filtered.features.map(f => String(f.id));
+}
+
+function buildAnalysisParams(type) {
   const id = window.GEO.sessionId;
   switch (type) {
     case "buffer":
